@@ -11,6 +11,8 @@
 
 #include <cuda_runtime.h>
 
+static constexpr double PROBABILITY_EPSILON = 1e-15;
+
 __host__ __device__ static inline int stateVectorSize(int num_qubits) {
     return 1 << num_qubits;
 }
@@ -143,6 +145,7 @@ int measureQubit(QubitRegister* reg, int target_qubit) {
         }
     }
 
+    // Clamp to [0, 1] to absorb floating-point accumulation noise.
     if (p0 < 0.0) {
         p0 = 0.0;
     }
@@ -155,7 +158,7 @@ int measureQubit(QubitRegister* reg, int target_qubit) {
     int result = (dist(rng) < p0) ? 0 : 1;
 
     double kept_probability = (result == 0) ? p0 : (1.0 - p0);
-    if (kept_probability < 1e-15) {
+    if (kept_probability < PROBABILITY_EPSILON) {
         for (int i = 0; i < size; ++i) {
             h_state[i] = make_cuDoubleComplex(0.0, 0.0);
         }
