@@ -76,9 +76,11 @@ __global__ void cnotKernel(Complex* state, int num_qubits, int control, int targ
     int target_bit = (idx >> target) & 1;
     if (control_bit == 1 && target_bit == 0) {
         int partner = idx | (1 << target);
-        Complex tmp = state[idx];
-        state[idx] = state[partner];
-        state[partner] = tmp;
+        if (idx < partner) {
+            Complex tmp = state[idx];
+            state[idx] = state[partner];
+            state[partner] = tmp;
+        }
     }
 }
 

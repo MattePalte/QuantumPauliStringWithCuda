@@ -31,14 +31,19 @@ void testSingleQubitRegisterFlow() {
     assertClose(state[0], 1.0);
     assertClose(state[1], 0.0);
 
-    applySingleQubitGate(&reg, 0, HADAMARD);
+    applySingleQubitGate(&reg, 0, PAULI_X);
     getStateVector(&reg, state);
-    double sqrt2_inv = 1.0 / sqrt(2.0);
-    assertClose(state[0], sqrt2_inv);
-    assertClose(state[1], sqrt2_inv);
+    assertClose(state[0], 0.0);
+    assertClose(state[1], 1.0);
 
     applySingleQubitGate(&reg, 0, PAULI_X);
     getStateVector(&reg, state);
+    assertClose(state[0], 1.0);
+    assertClose(state[1], 0.0);
+
+    applySingleQubitGate(&reg, 0, HADAMARD);
+    getStateVector(&reg, state);
+    double sqrt2_inv = 1.0 / sqrt(2.0);
     assertClose(state[0], sqrt2_inv);
     assertClose(state[1], sqrt2_inv);
 
@@ -93,7 +98,7 @@ void testBellState() {
 
     freeQubits(&reg);
 
-    int correlated = 0;
+    int matching_measurements = 0;
     const int trials = 100;
     for (int i = 0; i < trials; ++i) {
         QubitRegister shot;
@@ -104,13 +109,13 @@ void testBellState() {
         int m0 = measureQubit(&shot, 0);
         int m1 = measureQubit(&shot, 1);
         if (m0 == m1) {
-            ++correlated;
+            ++matching_measurements;
         }
 
         freeQubits(&shot);
     }
 
-    assert(correlated == trials);
+    assert(matching_measurements == trials);
     std::cout << "testBellState passed!" << std::endl;
 }
 
